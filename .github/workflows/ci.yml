@@ -342,7 +342,7 @@ jobs:
         run: ${{ matrix.command }}
 
   macos-app:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.repository_owner == 'openclaw'
     runs-on: macos-latest
     strategy:
       fail-fast: false
