@@ -60,6 +60,9 @@ export const ChannelUiMetaSchema = Type.Object(
     label: NonEmptyString,
     detailLabel: NonEmptyString,
     systemImage: Type.Optional(Type.String()),
+    description: Type.Optional(Type.String()),
+    docsPath: Type.Optional(Type.String()),
+    docsLabel: Type.Optional(Type.String()),
   },
   { additionalProperties: false },
 );

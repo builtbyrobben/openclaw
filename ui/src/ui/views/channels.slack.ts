@@ -3,6 +3,7 @@ import type { SlackStatus } from "../types.ts";
 import type { ChannelsProps } from "./channels.types.ts";
 import { formatAgo } from "../format.ts";
 import { renderChannelConfigSection } from "./channels.config.ts";
+import { renderChannelHeader } from "./channels.shared.ts";
 
 export function renderSlackCard(params: {
   props: ChannelsProps;
@@ -13,8 +14,15 @@ export function renderSlackCard(params: {
 
   return html`
     <div class="card">
-      <div class="card-title">Slack</div>
-      <div class="card-sub">Socket mode status and channel configuration.</div>
+      ${renderChannelHeader({
+        channelId: "slack",
+        props,
+        fallbackTitle: "Slack",
+        fallbackSub: "Socket mode status and channel configuration.",
+        actions: html`<button class="btn quiet btn--sm" @click=${() => props.onRefresh(true)}>
+          Probe
+        </button>`,
+      })}
       ${accountCountLabel}
 
       <div class="status-list" style="margin-top: 16px;">
@@ -54,12 +62,6 @@ export function renderSlackCard(params: {
       }
 
       ${renderChannelConfigSection({ channelId: "slack", props })}
-
-      <div class="row" style="margin-top: 12px;">
-        <button class="btn" @click=${() => props.onRefresh(true)}>
-          Probe
-        </button>
-      </div>
     </div>
   `;
 }

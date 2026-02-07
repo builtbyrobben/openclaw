@@ -405,6 +405,20 @@
   color: var(--accent);
 }
 
+.btn.quiet {
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted);
+  box-shadow: none;
+}
+
+.btn.quiet:hover {
+  background: var(--bg-hover);
+  border-color: var(--border);
+  color: var(--text);
+  transform: none;
+}
+
 .btn.danger {
   border-color: transparent;
   background: var(--danger-subtle);
@@ -413,6 +427,30 @@
 
 .btn.danger:hover {
   background: rgba(239, 68, 68, 0.15);
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.section-header__meta {
+  min-width: 0;
+}
+
+.section-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subtle-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 0;
 }
 
 .btn--sm {

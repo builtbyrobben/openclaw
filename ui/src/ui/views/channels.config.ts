@@ -124,6 +124,7 @@ export function renderChannelConfigForm(props: ChannelConfigFormProps) {
       ${renderNode({
         schema: node,
         value,
+        rootValue: configValue,
         path: ["channels", props.channelId],
         hints: props.uiHints,
         unsupported: new Set(analysis.unsupportedPaths),
@@ -139,38 +140,44 @@ export function renderChannelConfigForm(props: ChannelConfigFormProps) {
 export function renderChannelConfigSection(params: { channelId: string; props: ChannelsProps }) {
   const { channelId, props } = params;
   const disabled = props.configSaving || props.configSchemaLoading;
+  const openEditor = props.configFormDirty || props.configSchemaLoading;
   return html`
     <div style="margin-top: 16px;">
-      ${
-        props.configSchemaLoading
-          ? html`
-              <div class="muted">Loading config schema…</div>
-            `
-          : renderChannelConfigForm({
-              channelId,
-              configValue: props.configForm,
-              schema: props.configSchema,
-              uiHints: props.configUiHints,
-              disabled,
-              onPatch: props.onConfigPatch,
-            })
-      }
-      <div class="row" style="margin-top: 12px;">
-        <button
-          class="btn primary"
-          ?disabled=${disabled || !props.configFormDirty}
-          @click=${() => props.onConfigSave()}
-        >
-          ${props.configSaving ? "Saving…" : "Save"}
-        </button>
-        <button
-          class="btn"
-          ?disabled=${disabled}
-          @click=${() => props.onConfigReload()}
-        >
-          Reload
-        </button>
-      </div>
+      <details class="cfg-group cfg-group--advanced" ?open=${openEditor}>
+        <summary>Channel settings</summary>
+        <div class="cfg-group__body">
+          ${
+            props.configSchemaLoading
+              ? html`
+                  <div class="muted">Loading config schema…</div>
+                `
+              : renderChannelConfigForm({
+                  channelId,
+                  configValue: props.configForm,
+                  schema: props.configSchema,
+                  uiHints: props.configUiHints,
+                  disabled,
+                  onPatch: props.onConfigPatch,
+                })
+          }
+          <div class="section-header__actions">
+            <button
+              class="btn primary"
+              ?disabled=${disabled || !props.configFormDirty}
+              @click=${() => props.onConfigSave()}
+            >
+              ${props.configSaving ? "Saving…" : "Save"}
+            </button>
+            <button
+              class="btn quiet"
+              ?disabled=${disabled}
+              @click=${() => props.onConfigReload()}
+            >
+              Reload
+            </button>
+          </div>
+        </div>
+      </details>
     </div>
   `;
 }

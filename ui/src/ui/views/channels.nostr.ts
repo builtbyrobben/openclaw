@@ -8,6 +8,7 @@ import {
   type NostrProfileFormState,
   type NostrProfileFormCallbacks,
 } from "./channels.nostr-profile-form.ts";
+import { renderChannelHeader } from "./channels.shared.ts";
 
 /**
  * Truncate a pubkey for display (shows first and last 8 chars)
@@ -184,8 +185,15 @@ export function renderNostrCard(params: {
 
   return html`
     <div class="card">
-      <div class="card-title">Nostr</div>
-      <div class="card-sub">Decentralized DMs via Nostr relays (NIP-04).</div>
+      ${renderChannelHeader({
+        channelId: "nostr",
+        props,
+        fallbackTitle: "Nostr",
+        fallbackSub: "Decentralized DMs via Nostr relays (NIP-04).",
+        actions: html`<button class="btn quiet btn--sm" @click=${() => props.onRefresh(false)}>
+          Refresh
+        </button>`,
+      })}
       ${accountCountLabel}
 
       ${
@@ -228,10 +236,6 @@ export function renderNostrCard(params: {
       ${renderProfileSection()}
 
       ${renderChannelConfigSection({ channelId: "nostr", props })}
-
-      <div class="row" style="margin-top: 12px;">
-        <button class="btn" @click=${() => props.onRefresh(false)}>Refresh</button>
-      </div>
     </div>
   `;
 }

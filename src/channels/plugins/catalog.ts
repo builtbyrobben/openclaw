@@ -12,6 +12,9 @@ export type ChannelUiMetaEntry = {
   label: string;
   detailLabel: string;
   systemImage?: string;
+  description?: string;
+  docsPath?: string;
+  docsLabel?: string;
 };
 
 export type ChannelUiCatalog = {
@@ -242,6 +245,9 @@ export function buildChannelUiCatalog(
       label: plugin.meta.label,
       detailLabel,
       ...(plugin.meta.systemImage ? { systemImage: plugin.meta.systemImage } : {}),
+      ...(plugin.meta.blurb ? { description: plugin.meta.blurb } : {}),
+      ...(plugin.meta.docsPath ? { docsPath: plugin.meta.docsPath } : {}),
+      ...(plugin.meta.docsLabel ? { docsLabel: plugin.meta.docsLabel } : {}),
     };
   });
   const order = entries.map((entry) => entry.id);

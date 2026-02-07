@@ -11,6 +11,21 @@ export type ConfigUiHint = {
   sensitive?: boolean;
   placeholder?: string;
   itemTemplate?: unknown;
+  docsPath?: string;
+  impacts?: ConfigUiHintImpact[];
+};
+
+export type ConfigUiHintImpact = {
+  relation?: "requires" | "conflicts" | "recommends" | "risk";
+  targetPath?: string;
+  when?: "truthy" | "falsy" | "defined" | "notDefined" | "equals" | "notEquals" | "includes";
+  whenValue?: unknown;
+  targetWhen?: "truthy" | "falsy" | "defined" | "notDefined" | "equals" | "notEquals" | "includes";
+  targetValue?: unknown;
+  message: string;
+  fixValue?: unknown;
+  fixLabel?: string;
+  docsPath?: string;
 };
 
 export type ConfigUiHints = Record<string, ConfigUiHint>;
@@ -32,7 +47,19 @@ export type PluginUiMetadata = {
   description?: string;
   configUiHints?: Record<
     string,
-    Pick<ConfigUiHint, "label" | "help" | "advanced" | "sensitive" | "placeholder">
+    Pick<
+      ConfigUiHint,
+      | "label"
+      | "help"
+      | "group"
+      | "order"
+      | "advanced"
+      | "sensitive"
+      | "placeholder"
+      | "itemTemplate"
+      | "docsPath"
+      | "impacts"
+    >
   >;
   configSchema?: JsonSchemaNode;
 };
@@ -41,6 +68,7 @@ export type ChannelUiMetadata = {
   id: string;
   label?: string;
   description?: string;
+  docsPath?: string;
   configSchema?: JsonSchemaNode;
   configUiHints?: Record<string, ConfigUiHint>;
 };
@@ -753,6 +781,87 @@ const FIELD_HELP: Record<string, string> = {
     "Resolve PluralKit proxied messages and treat system members as distinct senders.",
   "channels.discord.pluralkit.token":
     "Optional PluralKit token for resolving private systems or members.",
+
+  // --- discord actions (top-level + per-account wildcard) ---
+  "channels.discord.actions.reactions":
+    "Allow the agent to add, remove, and list emoji reactions on Discord messages. Default: on.",
+  "channels.discord.actions.stickers":
+    "Allow the agent to send sticker messages in Discord channels. Default: on.",
+  "channels.discord.actions.emojiUploads":
+    "Allow the agent to upload custom emoji to the server. Default: on.",
+  "channels.discord.actions.stickerUploads":
+    "Allow the agent to upload custom stickers to the server. Default: on.",
+  "channels.discord.actions.polls":
+    "Allow the agent to create polls in Discord channels. Default: on.",
+  "channels.discord.actions.permissions":
+    "Allow the agent to view and manage channel permissions. Default: on.",
+  "channels.discord.actions.messages":
+    "Allow the agent to read, edit, and delete messages in Discord channels. Default: on.",
+  "channels.discord.actions.threads":
+    "Allow the agent to create, list, and reply in threads. Default: on.",
+  "channels.discord.actions.pins":
+    "Allow the agent to pin, unpin, and list pinned messages. Default: on.",
+  "channels.discord.actions.search":
+    "Allow the agent to search message history in Discord channels. Default: on.",
+  "channels.discord.actions.memberInfo":
+    "Allow the agent to look up member profiles, roles, and join dates. Default: on.",
+  "channels.discord.actions.roleInfo":
+    "Allow the agent to view role details (name, color, permissions). Default: on.",
+  "channels.discord.actions.roles":
+    "Allow the agent to assign and remove roles from members. Default: off — enable with caution.",
+  "channels.discord.actions.channelInfo":
+    "Allow the agent to read channel names, topics, and categories. Default: on.",
+  "channels.discord.actions.channels":
+    "Allow the agent to create, edit, delete, and move channels and categories. Default: on.",
+  "channels.discord.actions.voiceStatus":
+    "Allow the agent to view voice channel status (who is connected). Default: on.",
+  "channels.discord.actions.events":
+    "Allow the agent to list and create scheduled events in the server. Default: on.",
+  "channels.discord.actions.moderation":
+    "Allow the agent to timeout, kick, and ban members. Default: off — enable with caution.",
+  "channels.discord.actions.presence":
+    "Allow the agent to set its own presence/status (online, idle, DND). Default: off.",
+
+  // per-account discord action hints (wildcard)
+  "channels.discord.accounts.*.actions.reactions":
+    "Allow the agent to add, remove, and list emoji reactions on Discord messages. Default: on.",
+  "channels.discord.accounts.*.actions.stickers":
+    "Allow the agent to send sticker messages in Discord channels. Default: on.",
+  "channels.discord.accounts.*.actions.emojiUploads":
+    "Allow the agent to upload custom emoji to the server. Default: on.",
+  "channels.discord.accounts.*.actions.stickerUploads":
+    "Allow the agent to upload custom stickers to the server. Default: on.",
+  "channels.discord.accounts.*.actions.polls":
+    "Allow the agent to create polls in Discord channels. Default: on.",
+  "channels.discord.accounts.*.actions.permissions":
+    "Allow the agent to view and manage channel permissions. Default: on.",
+  "channels.discord.accounts.*.actions.messages":
+    "Allow the agent to read, edit, and delete messages in Discord channels. Default: on.",
+  "channels.discord.accounts.*.actions.threads":
+    "Allow the agent to create, list, and reply in threads. Default: on.",
+  "channels.discord.accounts.*.actions.pins":
+    "Allow the agent to pin, unpin, and list pinned messages. Default: on.",
+  "channels.discord.accounts.*.actions.search":
+    "Allow the agent to search message history in Discord channels. Default: on.",
+  "channels.discord.accounts.*.actions.memberInfo":
+    "Allow the agent to look up member profiles, roles, and join dates. Default: on.",
+  "channels.discord.accounts.*.actions.roleInfo":
+    "Allow the agent to view role details (name, color, permissions). Default: on.",
+  "channels.discord.accounts.*.actions.roles":
+    "Allow the agent to assign and remove roles from members. Default: off — enable with caution.",
+  "channels.discord.accounts.*.actions.channelInfo":
+    "Allow the agent to read channel names, topics, and categories. Default: on.",
+  "channels.discord.accounts.*.actions.channels":
+    "Allow the agent to create, edit, delete, and move channels and categories. Default: on.",
+  "channels.discord.accounts.*.actions.voiceStatus":
+    "Allow the agent to view voice channel status (who is connected). Default: on.",
+  "channels.discord.accounts.*.actions.events":
+    "Allow the agent to list and create scheduled events in the server. Default: on.",
+  "channels.discord.accounts.*.actions.moderation":
+    "Allow the agent to timeout, kick, and ban members. Default: off — enable with caution.",
+  "channels.discord.accounts.*.actions.presence":
+    "Allow the agent to set its own presence/status (online, idle, DND). Default: off.",
+
   "channels.slack.dm.policy":
     'Direct message access control ("pairing" recommended). "open" requires channels.slack.dm.allowFrom=["*"].',
 
@@ -942,6 +1051,98 @@ const FIELD_PLACEHOLDERS: Record<string, string> = {
   "ui.seamColor": "#6366f1",
 };
 
+const FIELD_DOCS: Record<string, string> = {
+  "gateway.mode": "/web/dashboard",
+  "gateway.bind": "/web/dashboard",
+  "gateway.controlUi.allowInsecureAuth": "/web/control-ui#insecure-http",
+  "channels.discord.actions.roles": "/channels/discord",
+  "channels.discord.actions.moderation": "/channels/discord",
+  "channels.discord.accounts.*.actions.roles": "/channels/discord",
+  "channels.discord.accounts.*.actions.moderation": "/channels/discord",
+};
+
+const FIELD_IMPACTS: Record<string, ConfigUiHintImpact[]> = {
+  "gateway.mode": [
+    {
+      relation: "requires",
+      when: "equals",
+      whenValue: "remote",
+      targetPath: "gateway.remote.url",
+      targetWhen: "defined",
+      message: "Remote mode requires a Remote Gateway URL.",
+    },
+    {
+      relation: "recommends",
+      when: "equals",
+      whenValue: "remote",
+      targetPath: "gateway.remote.token",
+      targetWhen: "defined",
+      message: "Set a remote token (or password) to avoid unauthorized connection errors.",
+    },
+  ],
+  "gateway.bind": [
+    {
+      relation: "risk",
+      when: "notEquals",
+      whenValue: "loopback",
+      message:
+        "Non-loopback bind exposes the gateway over the network. Keep auth on and firewall access tightly.",
+    },
+  ],
+  "gateway.controlUi.allowInsecureAuth": [
+    {
+      relation: "risk",
+      when: "truthy",
+      message:
+        "Insecure auth allows token auth over plain HTTP. Prefer HTTPS (or loopback) for dashboard access.",
+    },
+  ],
+  "channels.discord.actions.roles": [
+    {
+      relation: "requires",
+      when: "truthy",
+      targetPath: "channels.discord.actions.permissions",
+      targetWhen: "truthy",
+      message: "Role management depends on permissions actions being enabled.",
+      fixValue: true,
+      fixLabel: "Enable permissions",
+    },
+  ],
+  "channels.discord.actions.moderation": [
+    {
+      relation: "requires",
+      when: "truthy",
+      targetPath: "channels.discord.actions.permissions",
+      targetWhen: "truthy",
+      message: "Moderation actions depend on permissions actions being enabled.",
+      fixValue: true,
+      fixLabel: "Enable permissions",
+    },
+  ],
+  "channels.discord.accounts.*.actions.roles": [
+    {
+      relation: "requires",
+      when: "truthy",
+      targetPath: "channels.discord.accounts.*.actions.permissions",
+      targetWhen: "truthy",
+      message: "Role management depends on permissions actions being enabled for this account.",
+      fixValue: true,
+      fixLabel: "Enable permissions",
+    },
+  ],
+  "channels.discord.accounts.*.actions.moderation": [
+    {
+      relation: "requires",
+      when: "truthy",
+      targetPath: "channels.discord.accounts.*.actions.permissions",
+      targetWhen: "truthy",
+      message: "Moderation actions depend on permissions actions being enabled for this account.",
+      fixValue: true,
+      fixLabel: "Enable permissions",
+    },
+  ],
+};
+
 const SENSITIVE_PATTERNS = [/token/i, /password/i, /secret/i, /api.?key/i];
 
 function isSensitivePath(path: string): boolean {
@@ -1021,6 +1222,14 @@ function buildBaseHints(): ConfigUiHints {
     const current = hints[path];
     hints[path] = current ? { ...current, placeholder } : { placeholder };
   }
+  for (const [path, docsPath] of Object.entries(FIELD_DOCS)) {
+    const current = hints[path];
+    hints[path] = current ? { ...current, docsPath } : { docsPath };
+  }
+  for (const [path, impacts] of Object.entries(FIELD_IMPACTS)) {
+    const current = hints[path];
+    hints[path] = current ? { ...current, impacts } : { impacts };
+  }
   return hints;
 }
 
@@ -1088,10 +1297,12 @@ function applyChannelHints(hints: ConfigUiHints, channels: ChannelUiMetadata[]):
     const current = next[basePath] ?? {};
     const label = channel.label?.trim();
     const help = channel.description?.trim();
+    const docsPath = channel.docsPath?.trim();
     next[basePath] = {
       ...current,
       ...(label ? { label } : {}),
       ...(help ? { help } : {}),
+      ...(docsPath ? { docsPath } : {}),
     };
 
     const uiHints = channel.configUiHints ?? {};

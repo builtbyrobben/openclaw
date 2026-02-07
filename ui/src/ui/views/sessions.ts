@@ -109,74 +109,81 @@ function resolveThinkLevelPatchValue(value: string, isBinary: boolean): string |
 
 export function renderSessions(props: SessionsProps) {
   const rows = props.result?.sessions ?? [];
+  const showFiltersByDefault =
+    props.includeUnknown || !props.includeGlobal || Boolean(props.activeMinutes.trim());
   return html`
     <section class="card">
-      <div class="row" style="justify-content: space-between;">
-        <div>
+      <div class="section-header">
+        <div class="section-header__meta">
           <div class="card-title">Sessions</div>
           <div class="card-sub">Active session keys and per-session overrides.</div>
         </div>
-        <button class="btn" ?disabled=${props.loading} @click=${props.onRefresh}>
+        <button class="btn quiet" ?disabled=${props.loading} @click=${props.onRefresh}>
           ${props.loading ? "Loading…" : "Refresh"}
         </button>
       </div>
 
-      <div class="filters" style="margin-top: 14px;">
-        <label class="field">
-          <span>Active within (minutes)</span>
-          <input
-            .value=${props.activeMinutes}
-            @input=${(e: Event) =>
-              props.onFiltersChange({
-                activeMinutes: (e.target as HTMLInputElement).value,
-                limit: props.limit,
-                includeGlobal: props.includeGlobal,
-                includeUnknown: props.includeUnknown,
-              })}
-          />
-        </label>
-        <label class="field">
-          <span>Limit</span>
-          <input
-            .value=${props.limit}
-            @input=${(e: Event) =>
-              props.onFiltersChange({
-                activeMinutes: props.activeMinutes,
-                limit: (e.target as HTMLInputElement).value,
-                includeGlobal: props.includeGlobal,
-                includeUnknown: props.includeUnknown,
-              })}
-          />
-        </label>
-        <label class="field checkbox">
-          <span>Include global</span>
-          <input
-            type="checkbox"
-            .checked=${props.includeGlobal}
-            @change=${(e: Event) =>
-              props.onFiltersChange({
-                activeMinutes: props.activeMinutes,
-                limit: props.limit,
-                includeGlobal: (e.target as HTMLInputElement).checked,
-                includeUnknown: props.includeUnknown,
-              })}
-          />
-        </label>
-        <label class="field checkbox">
-          <span>Include unknown</span>
-          <input
-            type="checkbox"
-            .checked=${props.includeUnknown}
-            @change=${(e: Event) =>
-              props.onFiltersChange({
-                activeMinutes: props.activeMinutes,
-                limit: props.limit,
-                includeGlobal: props.includeGlobal,
-                includeUnknown: (e.target as HTMLInputElement).checked,
-              })}
-          />
-        </label>
-      </div>
+      <details class="cfg-group cfg-group--advanced" style="margin-top: 12px;" ?open=${showFiltersByDefault}>
+        <summary>Filters</summary>
+        <div class="cfg-group__body">
+          <div class="filters">
+            <label class="field">
+              <span>Active within (minutes)</span>
+              <input
+                .value=${props.activeMinutes}
+                @input=${(e: Event) =>
+                  props.onFiltersChange({
+                    activeMinutes: (e.target as HTMLInputElement).value,
+                    limit: props.limit,
+                    includeGlobal: props.includeGlobal,
+                    includeUnknown: props.includeUnknown,
+                  })}
+              />
+            </label>
+            <label class="field">
+              <span>Limit</span>
+              <input
+                .value=${props.limit}
+                @input=${(e: Event) =>
+                  props.onFiltersChange({
+                    activeMinutes: props.activeMinutes,
+                    limit: (e.target as HTMLInputElement).value,
+                    includeGlobal: props.includeGlobal,
+                    includeUnknown: props.includeUnknown,
+                  })}
+              />
+            </label>
+            <label class="field checkbox">
+              <span>Include global</span>
+              <input
+                type="checkbox"
+                .checked=${props.includeGlobal}
+                @change=${(e: Event) =>
+                  props.onFiltersChange({
+                    activeMinutes: props.activeMinutes,
+                    limit: props.limit,
+                    includeGlobal: (e.target as HTMLInputElement).checked,
+                    includeUnknown: props.includeUnknown,
+                  })}
+              />
+            </label>
+            <label class="field checkbox">
+              <span>Include unknown</span>
+              <input
+                type="checkbox"
+                .checked=${props.includeUnknown}
+                @change=${(e: Event) =>
+                  props.onFiltersChange({
+                    activeMinutes: props.activeMinutes,
+                    limit: props.limit,
+                    includeGlobal: props.includeGlobal,
+                    includeUnknown: (e.target as HTMLInputElement).checked,
+                  })}
+              />
+            </label>
+          </div>
+        </div>
+      </details>
 
       ${
         props.error

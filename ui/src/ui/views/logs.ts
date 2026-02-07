@@ -55,13 +55,13 @@ export function renderLogs(props: LogsProps) {
 
   return html`
     <section class="card">
-      <div class="row" style="justify-content: space-between;">
-        <div>
+      <div class="section-header">
+        <div class="section-header__meta">
           <div class="card-title">Logs</div>
           <div class="card-sub">Gateway file logs (JSONL).</div>
         </div>
-        <div class="row" style="gap: 8px;">
-          <button class="btn" ?disabled=${props.loading} @click=${props.onRefresh}>
+        <div class="section-header__actions">
+          <button class="btn quiet" ?disabled=${props.loading} @click=${props.onRefresh}>
             ${props.loading ? "Loading…" : "Refresh"}
           </button>
           <button
@@ -78,41 +78,46 @@ export function renderLogs(props: LogsProps) {
         </div>
       </div>
 
-      <div class="filters" style="margin-top: 14px;">
-        <label class="field" style="min-width: 220px;">
-          <span>Filter</span>
-          <input
-            .value=${props.filterText}
-            @input=${(e: Event) => props.onFilterTextChange((e.target as HTMLInputElement).value)}
-            placeholder="Search logs"
-          />
-        </label>
-        <label class="field checkbox">
-          <span>Auto-follow</span>
-          <input
-            type="checkbox"
-            .checked=${props.autoFollow}
-            @change=${(e: Event) =>
-              props.onToggleAutoFollow((e.target as HTMLInputElement).checked)}
-          />
-        </label>
-      </div>
-
-      <div class="chip-row" style="margin-top: 12px;">
-        ${LEVELS.map(
-          (level) => html`
-            <label class="chip log-chip ${level}">
+      <details class="cfg-group cfg-group--advanced" style="margin-top: 12px;" ?open=${Boolean(props.filterText.trim())}>
+        <summary>Filters</summary>
+        <div class="cfg-group__body">
+          <div class="filters">
+            <label class="field" style="min-width: 220px;">
+              <span>Filter</span>
+              <input
+                .value=${props.filterText}
+                @input=${(e: Event) => props.onFilterTextChange((e.target as HTMLInputElement).value)}
+                placeholder="Search logs"
+              />
+            </label>
+            <label class="field checkbox">
+              <span>Auto-follow</span>
               <input
                 type="checkbox"
-                .checked=${props.levelFilters[level]}
+                .checked=${props.autoFollow}
                 @change=${(e: Event) =>
-                  props.onLevelToggle(level, (e.target as HTMLInputElement).checked)}
+                  props.onToggleAutoFollow((e.target as HTMLInputElement).checked)}
               />
-              <span>${level}</span>
             </label>
-          `,
-        )}
-      </div>
+          </div>
+
+          <div class="chip-row">
+            ${LEVELS.map(
+              (level) => html`
+                <label class="chip log-chip ${level}">
+                  <input
+                    type="checkbox"
+                    .checked=${props.levelFilters[level]}
+                    @change=${(e: Event) =>
+                      props.onLevelToggle(level, (e.target as HTMLInputElement).checked)}
+                  />
+                  <span>${level}</span>
+                </label>
+              `,
+            )}
+          </div>
+        </div>
+      </details>
 
       ${
         props.file

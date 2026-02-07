@@ -3,6 +3,7 @@ import type { DiscordStatus } from "../types.ts";
 import type { ChannelsProps } from "./channels.types.ts";
 import { formatAgo } from "../format.ts";
 import { renderChannelConfigSection } from "./channels.config.ts";
+import { renderChannelHeader } from "./channels.shared.ts";
 
 export function renderDiscordCard(params: {
   props: ChannelsProps;
@@ -13,8 +14,15 @@ export function renderDiscordCard(params: {
 
   return html`
     <div class="card">
-      <div class="card-title">Discord</div>
-      <div class="card-sub">Bot status and channel configuration.</div>
+      ${renderChannelHeader({
+        channelId: "discord",
+        props,
+        fallbackTitle: "Discord",
+        fallbackSub: "Bot status and channel configuration.",
+        actions: html`<button class="btn quiet btn--sm" @click=${() => props.onRefresh(true)}>
+          Probe
+        </button>`,
+      })}
       ${accountCountLabel}
 
       <div class="status-list" style="margin-top: 16px;">
@@ -46,20 +54,21 @@ export function renderDiscordCard(params: {
 
       ${
         discord?.probe
-          ? html`<div class="callout" style="margin-top: 12px;">
-            Probe ${discord.probe.ok ? "ok" : "failed"} ·
-            ${discord.probe.status ?? ""} ${discord.probe.error ?? ""}
-          </div>`
+          ? html`
+              <details class="cfg-group cfg-group--advanced" style="margin-top: 12px;">
+                <summary>Latest probe</summary>
+                <div class="cfg-group__body">
+                  <div class="callout">
+                    Probe ${discord.probe.ok ? "ok" : "failed"} ·
+                    ${discord.probe.status ?? ""} ${discord.probe.error ?? ""}
+                  </div>
+                </div>
+              </details>
+            `
           : nothing
       }
 
       ${renderChannelConfigSection({ channelId: "discord", props })}
-
-      <div class="row" style="margin-top: 12px;">
-        <button class="btn" @click=${() => props.onRefresh(true)}>
-          Probe
-        </button>
-      </div>
     </div>
   `;
 }

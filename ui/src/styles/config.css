@@ -615,6 +615,55 @@
   gap: 22px;
 }
 
+.cfg-group {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
+}
+
+.cfg-group__title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted, var(--muted));
+}
+
+.cfg-group__body {
+  display: grid;
+  gap: 14px;
+}
+
+.cfg-group--advanced {
+  padding: 0;
+  overflow: hidden;
+}
+
+.cfg-group--advanced > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--bg-accent);
+}
+
+.cfg-group--advanced > summary::-webkit-details-marker {
+  display: none;
+}
+
+.cfg-group--advanced .cfg-group__body {
+  padding: 14px;
+}
+
 .cfg-field {
   display: grid;
   gap: 8px;
@@ -637,6 +686,70 @@
   font-size: 12px;
   color: var(--muted);
   line-height: 1.45;
+}
+
+.cfg-field__assist {
+  display: grid;
+  gap: 8px;
+}
+
+.cfg-field__docs {
+  display: inline-flex;
+  width: fit-content;
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.cfg-field__docs:hover {
+  text-decoration: underline;
+}
+
+.cfg-impact-list {
+  display: grid;
+  gap: 8px;
+}
+
+.cfg-impact {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-accent);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.cfg-impact--info {
+  border-color: rgba(59, 130, 246, 0.25);
+}
+
+.cfg-impact--warn {
+  border-color: rgba(245, 158, 11, 0.3);
+  background: color-mix(in srgb, rgba(245, 158, 11, 0.08) 60%, var(--bg-accent));
+}
+
+.cfg-impact--danger {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: color-mix(in srgb, rgba(239, 68, 68, 0.08) 60%, var(--bg-accent));
+}
+
+.cfg-impact__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cfg-impact__link {
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.cfg-impact__link:hover {
+  text-decoration: underline;
 }
 
 .cfg-field__error {
@@ -993,16 +1106,15 @@
   overflow: hidden;
 }
 
-/* Nested objects: lighter borders, left-accent instead of full border */
+/* Nested objects: remove stacked boxes and rely on spacing */
 .cfg-object .cfg-object {
-  border: none;
-  border-left: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
-  border-radius: 0;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  border-radius: var(--radius-md);
   background: transparent;
 }
 
 .cfg-object .cfg-object .cfg-object {
-  border-left-color: color-mix(in srgb, var(--accent) 20%, transparent);
+  border-color: color-mix(in srgb, var(--border) 70%, transparent);
 }
 
 :root[data-theme="light"] .cfg-object {
@@ -1046,7 +1158,7 @@
 .cfg-object .cfg-object .cfg-object__title {
   font-size: 13px;
   font-weight: 500;
-  color: var(--muted);
+  color: var(--text);
 }
 
 .cfg-object__chevron {

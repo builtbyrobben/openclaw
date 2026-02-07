@@ -33,10 +33,32 @@ import type {
 export type ChannelConfigUiHint = {
   label?: string;
   help?: string;
+  group?: string;
+  order?: number;
   advanced?: boolean;
   sensitive?: boolean;
   placeholder?: string;
   itemTemplate?: unknown;
+  docsPath?: string;
+  impacts?: Array<{
+    relation?: "requires" | "conflicts" | "recommends" | "risk";
+    targetPath?: string;
+    when?: "truthy" | "falsy" | "defined" | "notDefined" | "equals" | "notEquals" | "includes";
+    whenValue?: unknown;
+    targetWhen?:
+      | "truthy"
+      | "falsy"
+      | "defined"
+      | "notDefined"
+      | "equals"
+      | "notEquals"
+      | "includes";
+    targetValue?: unknown;
+    message: string;
+    fixValue?: unknown;
+    fixLabel?: string;
+    docsPath?: string;
+  }>;
 };
 
 export type ChannelConfigSchema = {

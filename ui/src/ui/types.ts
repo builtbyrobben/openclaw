@@ -15,6 +15,9 @@ export type ChannelUiMetaEntry = {
   label: string;
   detailLabel: string;
   systemImage?: string;
+  description?: string;
+  docsPath?: string;
+  docsLabel?: string;
 };
 
 export const CRON_CHANNEL_LAST = "last";
@@ -282,6 +285,7 @@ export type ConfigSnapshot = {
 };
 
 export type ConfigUiHint = {
+  docsPath?: string;
   label?: string;
   help?: string;
   group?: string;
@@ -290,6 +294,20 @@ export type ConfigUiHint = {
   sensitive?: boolean;
   placeholder?: string;
   itemTemplate?: unknown;
+  impacts?: ConfigUiHintImpact[];
+};
+
+export type ConfigUiHintImpact = {
+  relation?: "requires" | "conflicts" | "recommends" | "risk";
+  targetPath?: string;
+  when?: "truthy" | "falsy" | "defined" | "notDefined" | "equals" | "notEquals" | "includes";
+  whenValue?: unknown;
+  targetWhen?: "truthy" | "falsy" | "defined" | "notDefined" | "equals" | "notEquals" | "includes";
+  targetValue?: unknown;
+  message: string;
+  fixValue?: unknown;
+  fixLabel?: string;
+  docsPath?: string;
 };
 
 export type ConfigUiHints = Record<string, ConfigUiHint>;

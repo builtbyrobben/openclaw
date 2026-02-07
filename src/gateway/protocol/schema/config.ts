@@ -47,6 +47,7 @@ export const UpdateRunParamsSchema = Type.Object(
 
 export const ConfigUiHintSchema = Type.Object(
   {
+    docsPath: Type.Optional(Type.String()),
     label: Type.Optional(Type.String()),
     help: Type.Optional(Type.String()),
     group: Type.Optional(Type.String()),
@@ -55,6 +56,25 @@ export const ConfigUiHintSchema = Type.Object(
     sensitive: Type.Optional(Type.Boolean()),
     placeholder: Type.Optional(Type.String()),
     itemTemplate: Type.Optional(Type.Unknown()),
+    impacts: Type.Optional(
+      Type.Array(
+        Type.Object(
+          {
+            relation: Type.Optional(Type.String()),
+            targetPath: Type.Optional(Type.String()),
+            when: Type.Optional(Type.String()),
+            whenValue: Type.Optional(Type.Unknown()),
+            targetWhen: Type.Optional(Type.String()),
+            targetValue: Type.Optional(Type.Unknown()),
+            message: Type.String(),
+            fixValue: Type.Optional(Type.Unknown()),
+            fixLabel: Type.Optional(Type.String()),
+            docsPath: Type.Optional(Type.String()),
+          },
+          { additionalProperties: false },
+        ),
+      ),
+    ),
   },
   { additionalProperties: false },
 );

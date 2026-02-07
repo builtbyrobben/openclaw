@@ -451,6 +451,7 @@ export function renderConfigForm(props: ConfigFormProps) {
                   ${renderNode({
                     schema: node,
                     value: scopedValue,
+                    rootValue: value,
                     path: [sectionKey, subsectionKey],
                     hints: props.uiHints,
                     unsupported,
@@ -485,6 +486,7 @@ export function renderConfigForm(props: ConfigFormProps) {
                   ${renderNode({
                     schema: node,
                     value: value[key],
+                    rootValue: value,
                     path: [key],
                     hints: props.uiHints,
                     unsupported,

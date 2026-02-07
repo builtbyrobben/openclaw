@@ -143,6 +143,7 @@ export const configHandlers: GatewayRequestHandlers = {
         id: entry.id,
         label: entry.meta.label,
         description: entry.meta.blurb,
+        docsPath: entry.meta.docsPath,
         configSchema: entry.configSchema?.schema,
         configUiHints: entry.configSchema?.uiHints,
       })),

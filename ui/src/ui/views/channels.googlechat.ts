@@ -3,6 +3,7 @@ import type { GoogleChatStatus } from "../types.ts";
 import type { ChannelsProps } from "./channels.types.ts";
 import { formatAgo } from "../format.ts";
 import { renderChannelConfigSection } from "./channels.config.ts";
+import { renderChannelHeader } from "./channels.shared.ts";
 
 export function renderGoogleChatCard(params: {
   props: ChannelsProps;
@@ -13,8 +14,15 @@ export function renderGoogleChatCard(params: {
 
   return html`
     <div class="card">
-      <div class="card-title">Google Chat</div>
-      <div class="card-sub">Chat API webhook status and channel configuration.</div>
+      ${renderChannelHeader({
+        channelId: "googlechat",
+        props,
+        fallbackTitle: "Google Chat",
+        fallbackSub: "Chat API webhook status and channel configuration.",
+        actions: html`<button class="btn quiet btn--sm" @click=${() => props.onRefresh(true)}>
+          Probe
+        </button>`,
+      })}
       ${accountCountLabel}
 
       <div class="status-list" style="margin-top: 16px;">
@@ -68,12 +76,6 @@ export function renderGoogleChatCard(params: {
       }
 
       ${renderChannelConfigSection({ channelId: "googlechat", props })}
-
-      <div class="row" style="margin-top: 12px;">
-        <button class="btn" @click=${() => props.onRefresh(true)}>
-          Probe
-        </button>
-      </div>
     </div>
   `;
 }

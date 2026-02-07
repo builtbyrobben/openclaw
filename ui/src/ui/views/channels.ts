@@ -1,7 +1,6 @@
 import { html, nothing } from "lit";
 import type {
   ChannelAccountSnapshot,
-  ChannelUiMetaEntry,
   ChannelsStatusSnapshot,
   DiscordStatus,
   GoogleChatStatus,
@@ -20,7 +19,12 @@ import { renderDiscordCard } from "./channels.discord.ts";
 import { renderGoogleChatCard } from "./channels.googlechat.ts";
 import { renderIMessageCard } from "./channels.imessage.ts";
 import { renderNostrCard } from "./channels.nostr.ts";
-import { channelEnabled, renderChannelAccountCount } from "./channels.shared.ts";
+import {
+  channelEnabled,
+  renderChannelAccountCount,
+  renderChannelHeader,
+  resolveChannelLabel,
+} from "./channels.shared.ts";
 import { renderSignalCard } from "./channels.signal.ts";
 import { renderSlackCard } from "./channels.slack.ts";
 import { renderTelegramCard } from "./channels.telegram.ts";
@@ -68,8 +72,8 @@ export function renderChannels(props: ChannelsProps) {
     </section>
 
     <section class="card" style="margin-top: 18px;">
-      <div class="row" style="justify-content: space-between;">
-        <div>
+      <div class="section-header">
+        <div class="section-header__meta">
           <div class="card-title">Channel health</div>
           <div class="card-sub">Channel status snapshots from the gateway.</div>
         </div>
@@ -82,8 +86,8 @@ export function renderChannels(props: ChannelsProps) {
           </div>`
           : nothing
       }
-      <details style="margin-top: 12px;">
-        <summary style="cursor: pointer; user-select: none;">Show raw data</summary>
+      <details class="cfg-group cfg-group--advanced" style="margin-top: 12px;">
+        <summary>Show raw data</summary>
         <pre class="code-block" style="margin-top: 8px;">
 ${props.snapshot ? JSON.stringify(props.snapshot, null, 2) : "No snapshot yet."}
         </pre>
@@ -196,8 +200,12 @@ function renderGenericChannelCard(
 
   return html`
     <div class="card">
-      <div class="card-title">${label}</div>
-      <div class="card-sub">Channel status and configuration.</div>
+      ${renderChannelHeader({
+        channelId: key,
+        props,
+        fallbackTitle: label,
+        fallbackSub: "Channel status and configuration.",
+      })}
       ${accountCountLabel}
 
       ${
@@ -236,20 +244,6 @@ function renderGenericChannelCard(
       ${renderChannelConfigSection({ channelId: key, props })}
     </div>
   `;
-}
-
-function resolveChannelMetaMap(
-  snapshot: ChannelsStatusSnapshot | null,
-): Record<string, ChannelUiMetaEntry> {
-  if (!snapshot?.channelMeta?.length) {
-    return {};
-  }
-  return Object.fromEntries(snapshot.channelMeta.map((entry) => [entry.id, entry]));
-}
-
-function resolveChannelLabel(snapshot: ChannelsStatusSnapshot | null, key: string): string {
-  const meta = resolveChannelMetaMap(snapshot)[key];
-  return meta?.label ?? snapshot?.channelLabels?.[key] ?? key;
 }
 
 const RECENT_ACTIVITY_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes

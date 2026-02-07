@@ -3,6 +3,7 @@ import type { SignalStatus } from "../types.ts";
 import type { ChannelsProps } from "./channels.types.ts";
 import { formatAgo } from "../format.ts";
 import { renderChannelConfigSection } from "./channels.config.ts";
+import { renderChannelHeader } from "./channels.shared.ts";
 
 export function renderSignalCard(params: {
   props: ChannelsProps;
@@ -13,8 +14,15 @@ export function renderSignalCard(params: {
 
   return html`
     <div class="card">
-      <div class="card-title">Signal</div>
-      <div class="card-sub">signal-cli status and channel configuration.</div>
+      ${renderChannelHeader({
+        channelId: "signal",
+        props,
+        fallbackTitle: "Signal",
+        fallbackSub: "signal-cli status and channel configuration.",
+        actions: html`<button class="btn quiet btn--sm" @click=${() => props.onRefresh(true)}>
+          Probe
+        </button>`,
+      })}
       ${accountCountLabel}
 
       <div class="status-list" style="margin-top: 16px;">
@@ -58,12 +66,6 @@ export function renderSignalCard(params: {
       }
 
       ${renderChannelConfigSection({ channelId: "signal", props })}
-
-      <div class="row" style="margin-top: 12px;">
-        <button class="btn" @click=${() => props.onRefresh(true)}>
-          Probe
-        </button>
-      </div>
     </div>
   `;
 }

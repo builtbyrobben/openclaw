@@ -1,5 +1,9 @@
 import { html, nothing } from "lit";
-import type { ChannelAccountSnapshot } from "../types.ts";
+import type {
+  ChannelAccountSnapshot,
+  ChannelUiMetaEntry,
+  ChannelsStatusSnapshot,
+} from "../types.ts";
 import type { ChannelKey, ChannelsProps } from "./channels.types.ts";
 
 export function formatDuration(ms?: number | null) {
@@ -51,4 +55,94 @@ export function renderChannelAccountCount(
     return nothing;
   }
   return html`<div class="account-count">Accounts (${count})</div>`;
+}
+
+function resolveChannelMetaMap(
+  snapshot: ChannelsStatusSnapshot | null,
+): Record<string, ChannelUiMetaEntry> {
+  if (!snapshot?.channelMeta?.length) {
+    return {};
+  }
+  return Object.fromEntries(snapshot.channelMeta.map((entry) => [entry.id, entry]));
+}
+
+export function resolveChannelMeta(
+  snapshot: ChannelsStatusSnapshot | null,
+  key: string,
+): ChannelUiMetaEntry | null {
+  return resolveChannelMetaMap(snapshot)[key] ?? null;
+}
+
+export function resolveChannelLabel(snapshot: ChannelsStatusSnapshot | null, key: string): string {
+  const meta = resolveChannelMeta(snapshot, key);
+  return meta?.label ?? snapshot?.channelLabels?.[key] ?? key;
+}
+
+export function resolveChannelDescription(
+  snapshot: ChannelsStatusSnapshot | null,
+  key: string,
+  fallback: string,
+): string {
+  const meta = resolveChannelMeta(snapshot, key);
+  return meta?.description?.trim() || fallback;
+}
+
+function toDocsUrl(path?: string): string | null {
+  const raw = path?.trim();
+  if (!raw) {
+    return null;
+  }
+  if (raw.startsWith("http://") || raw.startsWith("https://")) {
+    return raw;
+  }
+  if (!raw.startsWith("/")) {
+    return `https://docs.openclaw.ai/${raw}`;
+  }
+  return `https://docs.openclaw.ai${raw}`;
+}
+
+export function resolveChannelDocsUrl(
+  snapshot: ChannelsStatusSnapshot | null,
+  key: string,
+): string | null {
+  const meta = resolveChannelMeta(snapshot, key);
+  return toDocsUrl(meta?.docsPath);
+}
+
+export function renderChannelHeader(params: {
+  channelId: string;
+  props: ChannelsProps;
+  fallbackTitle: string;
+  fallbackSub: string;
+  actions?: unknown;
+}) {
+  const title =
+    resolveChannelLabel(params.props.snapshot, params.channelId) ?? params.fallbackTitle;
+  const description = resolveChannelDescription(
+    params.props.snapshot,
+    params.channelId,
+    params.fallbackSub,
+  );
+  const docsUrl = resolveChannelDocsUrl(params.props.snapshot, params.channelId);
+
+  return html`
+    <div class="section-header">
+      <div class="section-header__meta">
+        <div class="card-title">${title}</div>
+        <div class="card-sub">${description}</div>
+      </div>
+      <div class="section-header__actions">
+        ${
+          docsUrl
+            ? html`
+                <a class="btn quiet btn--sm" href=${docsUrl} target="_blank" rel="noreferrer">
+                  Guide
+                </a>
+              `
+            : nothing
+        }
+        ${params.actions ?? nothing}
+      </div>
+    </div>
+  `;
 }

@@ -3,7 +3,7 @@ import type { WhatsAppStatus } from "../types.ts";
 import type { ChannelsProps } from "./channels.types.ts";
 import { formatAgo } from "../format.ts";
 import { renderChannelConfigSection } from "./channels.config.ts";
-import { formatDuration } from "./channels.shared.ts";
+import { formatDuration, renderChannelHeader } from "./channels.shared.ts";
 
 export function renderWhatsAppCard(params: {
   props: ChannelsProps;
@@ -14,8 +14,15 @@ export function renderWhatsAppCard(params: {
 
   return html`
     <div class="card">
-      <div class="card-title">WhatsApp</div>
-      <div class="card-sub">Link WhatsApp Web and monitor connection health.</div>
+      ${renderChannelHeader({
+        channelId: "whatsapp",
+        props,
+        fallbackTitle: "WhatsApp",
+        fallbackSub: "Link WhatsApp Web and monitor connection health.",
+        actions: html`<button class="btn quiet btn--sm" @click=${() => props.onRefresh(true)}>
+          Refresh
+        </button>`,
+      })}
       ${accountCountLabel}
 
       <div class="status-list" style="margin-top: 16px;">
@@ -107,9 +114,6 @@ export function renderWhatsAppCard(params: {
           @click=${() => props.onWhatsAppLogout()}
         >
           Logout
-        </button>
-        <button class="btn" @click=${() => props.onRefresh(true)}>
-          Refresh
         </button>
       </div>
 

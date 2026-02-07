@@ -558,7 +558,7 @@ export function renderConfig(props: ConfigProps) {
           </div>
           <div class="config-actions__right">
             <button
-              class="btn btn--sm"
+              class="btn btn--sm quiet"
               ?disabled=${props.loading}
               @click=${props.onReload}
             >
@@ -572,14 +572,14 @@ export function renderConfig(props: ConfigProps) {
               ${props.saving ? "Saving…" : "Save"}
             </button>
             <button
-              class="btn btn--sm"
+              class="btn btn--sm quiet"
               ?disabled=${!canApply}
               @click=${props.onApply}
             >
               ${props.applying ? "Applying…" : "Apply"}
             </button>
             <button
-              class="btn btn--sm"
+              class="btn btn--sm quiet"
               ?disabled=${!canUpdate}
               @click=${props.onUpdate}
             >

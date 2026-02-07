@@ -3,6 +3,7 @@ import type { ChannelAccountSnapshot, TelegramStatus } from "../types.ts";
 import type { ChannelsProps } from "./channels.types.ts";
 import { formatAgo } from "../format.ts";
 import { renderChannelConfigSection } from "./channels.config.ts";
+import { renderChannelHeader } from "./channels.shared.ts";
 
 export function renderTelegramCard(params: {
   props: ChannelsProps;
@@ -54,8 +55,15 @@ export function renderTelegramCard(params: {
 
   return html`
     <div class="card">
-      <div class="card-title">Telegram</div>
-      <div class="card-sub">Bot status and channel configuration.</div>
+      ${renderChannelHeader({
+        channelId: "telegram",
+        props,
+        fallbackTitle: "Telegram",
+        fallbackSub: "Bot status and channel configuration.",
+        actions: html`<button class="btn quiet btn--sm" @click=${() => props.onRefresh(true)}>
+          Probe
+        </button>`,
+      })}
       ${accountCountLabel}
 
       ${
@@ -109,12 +117,6 @@ export function renderTelegramCard(params: {
       }
 
       ${renderChannelConfigSection({ channelId: "telegram", props })}
-
-      <div class="row" style="margin-top: 12px;">
-        <button class="btn" @click=${() => props.onRefresh(true)}>
-          Probe
-        </button>
-      </div>
     </div>
   `;
 }

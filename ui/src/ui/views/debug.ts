@@ -35,18 +35,19 @@ export function renderDebug(props: DebugProps) {
   return html`
     <section class="grid grid-cols-2">
       <div class="card">
-        <div class="row" style="justify-content: space-between;">
-          <div>
+        <div class="section-header">
+          <div class="section-header__meta">
             <div class="card-title">Snapshots</div>
             <div class="card-sub">Status, health, and heartbeat data.</div>
           </div>
-          <button class="btn" ?disabled=${props.loading} @click=${props.onRefresh}>
+          <button class="btn quiet" ?disabled=${props.loading} @click=${props.onRefresh}>
             ${props.loading ? "Refreshing…" : "Refresh"}
           </button>
         </div>
         <div class="stack" style="margin-top: 12px;">
-          <div>
-            <div class="muted">Status</div>
+          <details class="cfg-group cfg-group--advanced" open>
+            <summary>Status</summary>
+            <div class="cfg-group__body">
             ${
               securitySummary
                 ? html`<div class="callout ${securityTone}" style="margin-top: 8px;">
@@ -56,15 +57,20 @@ export function renderDebug(props: DebugProps) {
                 : nothing
             }
             <pre class="code-block">${JSON.stringify(props.status ?? {}, null, 2)}</pre>
-          </div>
-          <div>
-            <div class="muted">Health</div>
-            <pre class="code-block">${JSON.stringify(props.health ?? {}, null, 2)}</pre>
-          </div>
-          <div>
-            <div class="muted">Last heartbeat</div>
-            <pre class="code-block">${JSON.stringify(props.heartbeat ?? {}, null, 2)}</pre>
-          </div>
+            </div>
+          </details>
+          <details class="cfg-group cfg-group--advanced">
+            <summary>Health</summary>
+            <div class="cfg-group__body">
+              <pre class="code-block">${JSON.stringify(props.health ?? {}, null, 2)}</pre>
+            </div>
+          </details>
+          <details class="cfg-group cfg-group--advanced">
+            <summary>Last heartbeat</summary>
+            <div class="cfg-group__body">
+              <pre class="code-block">${JSON.stringify(props.heartbeat ?? {}, null, 2)}</pre>
+            </div>
+          </details>
         </div>
       </div>
 
@@ -109,41 +115,45 @@ export function renderDebug(props: DebugProps) {
     </section>
 
     <section class="card" style="margin-top: 18px;">
-      <div class="card-title">Models</div>
-      <div class="card-sub">Catalog from models.list.</div>
-      <pre class="code-block" style="margin-top: 12px;">${JSON.stringify(
-        props.models ?? [],
-        null,
-        2,
-      )}</pre>
+      <details class="cfg-group cfg-group--advanced">
+        <summary>Models catalog</summary>
+        <div class="cfg-group__body">
+          <div class="card-sub">Catalog from models.list.</div>
+          <pre class="code-block">${JSON.stringify(props.models ?? [], null, 2)}</pre>
+        </div>
+      </details>
     </section>
 
     <section class="card" style="margin-top: 18px;">
-      <div class="card-title">Event Log</div>
-      <div class="card-sub">Latest gateway events.</div>
-      ${
-        props.eventLog.length === 0
-          ? html`
-              <div class="muted" style="margin-top: 12px">No events yet.</div>
-            `
-          : html`
-            <div class="list" style="margin-top: 12px;">
-              ${props.eventLog.map(
-                (evt) => html`
-                  <div class="list-item">
-                    <div class="list-main">
-                      <div class="list-title">${evt.event}</div>
-                      <div class="list-sub">${new Date(evt.ts).toLocaleTimeString()}</div>
-                    </div>
-                    <div class="list-meta">
-                      <pre class="code-block">${formatEventPayload(evt.payload)}</pre>
-                    </div>
-                  </div>
-                `,
-              )}
-            </div>
-          `
-      }
+      <details class="cfg-group cfg-group--advanced">
+        <summary>Event log</summary>
+        <div class="cfg-group__body">
+          <div class="card-sub">Latest gateway events.</div>
+          ${
+            props.eventLog.length === 0
+              ? html`
+                  <div class="muted">No events yet.</div>
+                `
+              : html`
+                <div class="list">
+                  ${props.eventLog.map(
+                    (evt) => html`
+                      <div class="list-item">
+                        <div class="list-main">
+                          <div class="list-title">${evt.event}</div>
+                          <div class="list-sub">${new Date(evt.ts).toLocaleTimeString()}</div>
+                        </div>
+                        <div class="list-meta">
+                          <pre class="code-block">${formatEventPayload(evt.payload)}</pre>
+                        </div>
+                      </div>
+                    `,
+                  )}
+                </div>
+              `
+          }
+        </div>
+      </details>
     </section>
   `;
 }
