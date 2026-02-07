@@ -1,4 +1,4 @@
-import type { ConfigUiHintImpact, ConfigUiHints } from "../types.ts";
+import type { ConfigUiHint, ConfigUiHintImpact, ConfigUiHints } from "../types.ts";
 
 export type JsonSchema = {
   type?: string | string[];
@@ -56,7 +56,122 @@ export function pathKey(path: Array<string | number>): string {
   return path.filter((segment) => typeof segment === "string").join(".");
 }
 
-export function hintForPath(path: Array<string | number>, hints: ConfigUiHints) {
+const FALLBACK_UI_HINTS: ConfigUiHints = {
+  "channels.*.allowBots": {
+    help: "Allow replies to bot-authored messages (default: off). Keep mention/allowlist guardrails to avoid bot loops.",
+    docsPath: "/gateway/configuration",
+    impacts: [
+      {
+        relation: "risk",
+        when: "truthy",
+        message:
+          "Allowing bot-authored messages can create bot-to-bot reply loops. Keep mention/allowlist guardrails in place.",
+        docsPath: "/gateway/security",
+      },
+    ],
+  },
+  "channels.*.accounts.*.allowBots": {
+    help: "Allow replies to bot-authored messages for this account (default: off).",
+    docsPath: "/gateway/configuration",
+    impacts: [
+      {
+        relation: "risk",
+        when: "truthy",
+        message:
+          "Allowing bot-authored messages can create bot-to-bot reply loops. Keep mention/allowlist guardrails in place.",
+        docsPath: "/gateway/security",
+      },
+    ],
+  },
+  "channels.*.blockStreaming": {
+    help: "Emit completed reply chunks while generating, instead of waiting for one final message.",
+    docsPath: "/concepts/streaming",
+  },
+  "channels.*.accounts.*.blockStreaming": {
+    help: "Emit completed reply chunks while generating for this account.",
+    docsPath: "/concepts/streaming",
+  },
+  "channels.*.capabilities": {
+    help: "Optional runtime capability tags. Leave empty unless channel docs explicitly require a tag.",
+    docsPath: "/gateway/configuration",
+  },
+  "channels.*.accounts.*.capabilities": {
+    help: "Optional runtime capability tags for this account. Leave empty unless docs require one.",
+    docsPath: "/gateway/configuration",
+  },
+  "channels.*.dm.policy": {
+    help: 'DM access policy. If set to "open", allowFrom should include "*".',
+    docsPath: "/gateway/security",
+    impacts: [
+      {
+        relation: "requires",
+        when: "equals",
+        whenValue: "open",
+        targetPath: "channels.*.dm.allowFrom",
+        targetWhen: "includes",
+        targetValue: "*",
+        message: 'Open DM policy requires allowFrom to include "*".',
+        fixValue: ["*"],
+        fixLabel: 'Allow all ("*")',
+      },
+    ],
+  },
+  "channels.*.accounts.*.dm.policy": {
+    help: 'DM access policy for this account. If set to "open", allowFrom should include "*".',
+    docsPath: "/gateway/security",
+    impacts: [
+      {
+        relation: "requires",
+        when: "equals",
+        whenValue: "open",
+        targetPath: "channels.*.accounts.*.dm.allowFrom",
+        targetWhen: "includes",
+        targetValue: "*",
+        message: 'Open DM policy requires allowFrom to include "*".',
+        fixValue: ["*"],
+        fixLabel: 'Allow all ("*")',
+      },
+    ],
+  },
+  "channels.*.dmPolicy": {
+    help: 'DM access policy. If set to "open", allowFrom should include "*".',
+    docsPath: "/gateway/security",
+  },
+  "channels.*.accounts.*.dmPolicy": {
+    help: 'DM access policy for this account. If set to "open", allowFrom should include "*".',
+    docsPath: "/gateway/security",
+  },
+  "channels.telegram.streamMode": {
+    docsPath: "/concepts/streaming",
+    impacts: [
+      {
+        relation: "conflicts",
+        when: "notEquals",
+        whenValue: "off",
+        targetPath: "channels.telegram.blockStreaming",
+        targetWhen: "truthy",
+        message:
+          "Telegram draft streaming can suppress block streaming for a reply. Use streamMode=off for block-only behavior.",
+      },
+    ],
+  },
+  "channels.telegram.accounts.*.streamMode": {
+    docsPath: "/concepts/streaming",
+    impacts: [
+      {
+        relation: "conflicts",
+        when: "notEquals",
+        whenValue: "off",
+        targetPath: "channels.telegram.accounts.*.blockStreaming",
+        targetWhen: "truthy",
+        message:
+          "Telegram draft streaming can suppress block streaming for a reply. Use streamMode=off for block-only behavior.",
+      },
+    ],
+  },
+};
+
+function resolveHint(path: Array<string | number>, hints: ConfigUiHints): ConfigUiHint | undefined {
   const key = pathKey(path);
   const direct = hints[key];
   if (direct) {
@@ -83,6 +198,22 @@ export function hintForPath(path: Array<string | number>, hints: ConfigUiHints) 
     }
   }
   return undefined;
+}
+
+export function hintForPath(path: Array<string | number>, hints: ConfigUiHints) {
+  const fallback = resolveHint(path, FALLBACK_UI_HINTS);
+  const resolved = resolveHint(path, hints);
+  if (!fallback) {
+    return resolved;
+  }
+  if (!resolved) {
+    return fallback;
+  }
+  return {
+    ...fallback,
+    ...resolved,
+    impacts: [...(fallback.impacts ?? []), ...(resolved.impacts ?? [])],
+  };
 }
 
 export function humanize(raw: string) {

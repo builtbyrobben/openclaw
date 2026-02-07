@@ -158,6 +158,121 @@ describe("config form renderer", () => {
     expect(onPatch).toHaveBeenCalledWith(["slack"], {});
   });
 
+  it("shows contextual map-key guidance for discord guild maps", () => {
+    const onPatch = vi.fn();
+    const container = document.createElement("div");
+    const schema = {
+      type: "object",
+      properties: {
+        channels: {
+          type: "object",
+          properties: {
+            discord: {
+              type: "object",
+              properties: {
+                guilds: {
+                  type: "object",
+                  additionalProperties: {
+                    type: "string",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const analysis = analyzeConfigSchema(schema);
+    render(
+      renderConfigForm({
+        schema: analysis.schema,
+        uiHints: {},
+        unsupportedPaths: analysis.unsupportedPaths,
+        value: { channels: { discord: { guilds: { "123456789012345678": "on" } } } },
+        onPatch,
+      }),
+      container,
+    );
+
+    const addButton = Array.from(
+      container.querySelectorAll<HTMLButtonElement>(".cfg-map__add"),
+    ).find((button) => button.textContent?.includes("Add Guild"));
+    expect(addButton).toBeDefined();
+    expect(container.textContent).toContain("Use Discord guild IDs");
+    expect(
+      container
+        .querySelector<HTMLInputElement>(".cfg-map__item-key input")
+        ?.getAttribute("placeholder"),
+    ).toBe("123456789012345678");
+  });
+
+  it("uses singular add labels for arrays with named hints", () => {
+    const onPatch = vi.fn();
+    const container = document.createElement("div");
+    const schema = {
+      type: "object",
+      properties: {
+        owners: {
+          type: "array",
+          items: { type: "string" },
+        },
+      },
+    };
+    const analysis = analyzeConfigSchema(schema);
+    render(
+      renderConfigForm({
+        schema: analysis.schema,
+        uiHints: {
+          owners: { label: "Owners" },
+        },
+        unsupportedPaths: analysis.unsupportedPaths,
+        value: { owners: [] },
+        onPatch,
+      }),
+      container,
+    );
+
+    expect(container.textContent).toContain("Add Owner");
+    expect(container.textContent).toContain("Each owner expects text.");
+  });
+
+  it("applies fallback hints when backend uiHints are missing", () => {
+    const onPatch = vi.fn();
+    const container = document.createElement("div");
+    const schema = {
+      type: "object",
+      properties: {
+        channels: {
+          type: "object",
+          properties: {
+            discord: {
+              type: "object",
+              properties: {
+                allowBots: { type: "boolean" },
+              },
+            },
+          },
+        },
+      },
+    };
+    const analysis = analyzeConfigSchema(schema);
+    render(
+      renderConfigForm({
+        schema: analysis.schema,
+        uiHints: {},
+        unsupportedPaths: analysis.unsupportedPaths,
+        value: { channels: { discord: { allowBots: true } } },
+        onPatch,
+      }),
+      container,
+    );
+
+    expect(container.textContent).toContain("Allow replies to bot-authored messages");
+    expect(container.textContent).toContain("bot-to-bot reply loops");
+    const docsLink = container.querySelector("a.cfg-field__docs");
+    expect(docsLink?.getAttribute("href")).toBe("https://docs.openclaw.ai/gateway/configuration");
+  });
+
   it("supports wildcard uiHints for map entries", () => {
     const onPatch = vi.fn();
     const container = document.createElement("div");

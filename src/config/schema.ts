@@ -534,6 +534,38 @@ const FIELD_HELP: Record<string, string> = {
   "tools.web.fetch.firecrawl.timeoutSeconds": "Timeout in seconds for Firecrawl requests.",
   "channels.slack.allowBots":
     "Allow bot-authored messages to trigger Slack replies (default: false).",
+  "channels.*.allowBots":
+    "Allow replies to bot-authored messages for this channel (default: false). Keep mention/allowlist guardrails to avoid bot loops.",
+  "channels.*.accounts.*.allowBots":
+    "Allow replies to bot-authored messages for this account (default: false). Keep mention/allowlist guardrails to avoid bot loops.",
+  "channels.*.blockStreaming":
+    "Send completed reply blocks while the model is still generating for this channel/account.",
+  "channels.*.accounts.*.blockStreaming":
+    "Send completed reply blocks while the model is still generating for this account.",
+  "channels.*.capabilities":
+    "Optional runtime capability tags. Leave empty unless a feature/docs explicitly require a tag.",
+  "channels.*.accounts.*.capabilities":
+    "Optional runtime capability tags for this account. Leave empty unless a feature/docs explicitly require a tag.",
+  "channels.*.dm.policy":
+    'Direct message access policy for this channel account. "open" requires allowFrom to include "*".',
+  "channels.*.accounts.*.dm.policy":
+    'Direct message access policy for this account. "open" requires allowFrom to include "*".',
+  "channels.*.dmPolicy":
+    'Direct message access policy for this channel. "open" requires allowFrom to include "*".',
+  "channels.*.accounts.*.dmPolicy":
+    'Direct message access policy for this account. "open" requires allowFrom to include "*".',
+  "channels.discord.groupPolicy":
+    'Guild message policy. "allowlist" requires guild entries under channels.discord.guilds.',
+  "channels.discord.accounts.*.groupPolicy":
+    'Guild message policy for this account. "allowlist" requires guild entries under channels.discord.accounts.<id>.guilds.',
+  "channels.slack.groupPolicy":
+    'Channel message policy. "allowlist" requires channel entries under channels.slack.channels.',
+  "channels.slack.accounts.*.groupPolicy":
+    'Channel message policy for this account. "allowlist" requires channel entries under channels.slack.accounts.<id>.channels.',
+  "channels.googlechat.groupPolicy":
+    'Space message policy. "allowlist" requires space entries under channels.googlechat.groups.',
+  "channels.googlechat.accounts.*.groupPolicy":
+    'Space message policy for this account. "allowlist" requires space entries under channels.googlechat.accounts.<id>.groups.',
   "channels.slack.thread.historyScope":
     'Scope for Slack thread history context ("thread" isolates per thread; "channel" reuses channel history).',
   "channels.slack.thread.inheritParent":
@@ -1055,6 +1087,20 @@ const FIELD_DOCS: Record<string, string> = {
   "gateway.mode": "/web/dashboard",
   "gateway.bind": "/web/dashboard",
   "gateway.controlUi.allowInsecureAuth": "/web/control-ui#insecure-http",
+  "channels.*.allowBots": "/gateway/configuration",
+  "channels.*.accounts.*.allowBots": "/gateway/configuration",
+  "channels.*.blockStreaming": "/concepts/streaming",
+  "channels.*.accounts.*.blockStreaming": "/concepts/streaming",
+  "channels.*.dm.policy": "/gateway/security",
+  "channels.*.accounts.*.dm.policy": "/gateway/security",
+  "channels.*.dmPolicy": "/gateway/security",
+  "channels.*.accounts.*.dmPolicy": "/gateway/security",
+  "channels.discord.groupPolicy": "/channels/discord",
+  "channels.discord.accounts.*.groupPolicy": "/channels/discord",
+  "channels.slack.groupPolicy": "/channels/slack",
+  "channels.slack.accounts.*.groupPolicy": "/channels/slack",
+  "channels.googlechat.groupPolicy": "/channels/googlechat",
+  "channels.googlechat.accounts.*.groupPolicy": "/channels/googlechat",
   "channels.discord.actions.roles": "/channels/discord",
   "channels.discord.actions.moderation": "/channels/discord",
   "channels.discord.accounts.*.actions.roles": "/channels/discord",
@@ -1095,6 +1141,194 @@ const FIELD_IMPACTS: Record<string, ConfigUiHintImpact[]> = {
       when: "truthy",
       message:
         "Insecure auth allows token auth over plain HTTP. Prefer HTTPS (or loopback) for dashboard access.",
+    },
+  ],
+  "channels.*.allowBots": [
+    {
+      relation: "risk",
+      when: "truthy",
+      message:
+        "Allowing bot-authored messages can create bot-to-bot reply loops. Prefer mention/allowlist guardrails.",
+      docsPath: "/gateway/security",
+    },
+  ],
+  "channels.*.accounts.*.allowBots": [
+    {
+      relation: "risk",
+      when: "truthy",
+      message:
+        "Allowing bot-authored messages can create bot-to-bot reply loops. Prefer mention/allowlist guardrails.",
+      docsPath: "/gateway/security",
+    },
+  ],
+  "channels.*.dm.policy": [
+    {
+      relation: "requires",
+      when: "equals",
+      whenValue: "open",
+      targetPath: "channels.*.dm.allowFrom",
+      targetWhen: "includes",
+      targetValue: "*",
+      message: 'Open DM policy requires allowFrom to include "*".',
+      fixValue: ["*"],
+      fixLabel: 'Allow all ("*")',
+      docsPath: "/gateway/security",
+    },
+  ],
+  "channels.*.accounts.*.dm.policy": [
+    {
+      relation: "requires",
+      when: "equals",
+      whenValue: "open",
+      targetPath: "channels.*.accounts.*.dm.allowFrom",
+      targetWhen: "includes",
+      targetValue: "*",
+      message: 'Open DM policy requires allowFrom to include "*".',
+      fixValue: ["*"],
+      fixLabel: 'Allow all ("*")',
+      docsPath: "/gateway/security",
+    },
+  ],
+  "channels.*.dmPolicy": [
+    {
+      relation: "requires",
+      when: "equals",
+      whenValue: "open",
+      targetPath: "channels.*.allowFrom",
+      targetWhen: "includes",
+      targetValue: "*",
+      message: 'Open DM policy requires allowFrom to include "*".',
+      fixValue: ["*"],
+      fixLabel: 'Allow all ("*")',
+      docsPath: "/gateway/security",
+    },
+  ],
+  "channels.*.accounts.*.dmPolicy": [
+    {
+      relation: "requires",
+      when: "equals",
+      whenValue: "open",
+      targetPath: "channels.*.accounts.*.allowFrom",
+      targetWhen: "includes",
+      targetValue: "*",
+      message: 'Open DM policy requires allowFrom to include "*".',
+      fixValue: ["*"],
+      fixLabel: 'Allow all ("*")',
+      docsPath: "/gateway/security",
+    },
+  ],
+  "channels.discord.groupPolicy": [
+    {
+      relation: "requires",
+      when: "equals",
+      whenValue: "allowlist",
+      targetPath: "channels.discord.guilds",
+      targetWhen: "defined",
+      message: 'Discord "allowlist" policy needs at least one guild entry.',
+      docsPath: "/channels/discord",
+    },
+  ],
+  "channels.discord.accounts.*.groupPolicy": [
+    {
+      relation: "requires",
+      when: "equals",
+      whenValue: "allowlist",
+      targetPath: "channels.discord.accounts.*.guilds",
+      targetWhen: "defined",
+      message: 'Discord "allowlist" policy needs at least one guild entry for this account.',
+      docsPath: "/channels/discord",
+    },
+  ],
+  "channels.slack.groupPolicy": [
+    {
+      relation: "requires",
+      when: "equals",
+      whenValue: "allowlist",
+      targetPath: "channels.slack.channels",
+      targetWhen: "defined",
+      message: 'Slack "allowlist" policy needs at least one channel entry.',
+      docsPath: "/channels/slack",
+    },
+  ],
+  "channels.slack.accounts.*.groupPolicy": [
+    {
+      relation: "requires",
+      when: "equals",
+      whenValue: "allowlist",
+      targetPath: "channels.slack.accounts.*.channels",
+      targetWhen: "defined",
+      message: 'Slack "allowlist" policy needs at least one channel entry for this account.',
+      docsPath: "/channels/slack",
+    },
+  ],
+  "channels.googlechat.groupPolicy": [
+    {
+      relation: "requires",
+      when: "equals",
+      whenValue: "allowlist",
+      targetPath: "channels.googlechat.groups",
+      targetWhen: "defined",
+      message: 'Google Chat "allowlist" policy needs at least one space entry.',
+      docsPath: "/channels/googlechat",
+    },
+  ],
+  "channels.googlechat.accounts.*.groupPolicy": [
+    {
+      relation: "requires",
+      when: "equals",
+      whenValue: "allowlist",
+      targetPath: "channels.googlechat.accounts.*.groups",
+      targetWhen: "defined",
+      message: 'Google Chat "allowlist" policy needs at least one space entry for this account.',
+      docsPath: "/channels/googlechat",
+    },
+  ],
+  "channels.telegram.streamMode": [
+    {
+      relation: "conflicts",
+      when: "notEquals",
+      whenValue: "off",
+      targetPath: "channels.telegram.blockStreaming",
+      targetWhen: "truthy",
+      message:
+        "Telegram draft streaming can suppress block streaming for a reply. Set streamMode=off for block-only behavior.",
+      docsPath: "/concepts/streaming",
+    },
+  ],
+  "channels.telegram.accounts.*.streamMode": [
+    {
+      relation: "conflicts",
+      when: "notEquals",
+      whenValue: "off",
+      targetPath: "channels.telegram.accounts.*.blockStreaming",
+      targetWhen: "truthy",
+      message:
+        "Telegram draft streaming can suppress block streaming for a reply. Set streamMode=off for block-only behavior.",
+      docsPath: "/concepts/streaming",
+    },
+  ],
+  "channels.telegram.blockStreaming": [
+    {
+      relation: "conflicts",
+      when: "truthy",
+      targetPath: "channels.telegram.streamMode",
+      targetWhen: "notEquals",
+      targetValue: "off",
+      message:
+        "Telegram streamMode is enabled. Use streamMode=off if you want block streaming to drive replies.",
+      docsPath: "/concepts/streaming",
+    },
+  ],
+  "channels.telegram.accounts.*.blockStreaming": [
+    {
+      relation: "conflicts",
+      when: "truthy",
+      targetPath: "channels.telegram.accounts.*.streamMode",
+      targetWhen: "notEquals",
+      targetValue: "off",
+      message:
+        "Telegram streamMode is enabled for this account. Use streamMode=off for block-only behavior.",
+      docsPath: "/concepts/streaming",
     },
   ],
   "channels.discord.actions.roles": [

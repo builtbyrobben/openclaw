@@ -120,5 +120,11 @@ describe("config schema", () => {
     expect(res.uiHints["channels.discord"]?.docsPath).toBe("/channels/discord");
     expect(res.uiHints["channels.discord.actions.roles"]?.docsPath).toBe("/channels/discord");
     expect(res.uiHints["channels.discord.actions.roles"]?.impacts?.[0]?.relation).toBe("requires");
+    expect(res.uiHints["channels.*.allowBots"]?.docsPath).toBe("/gateway/configuration");
+    expect(res.uiHints["channels.*.allowBots"]?.impacts?.[0]?.relation).toBe("risk");
+    expect(res.uiHints["channels.*.dm.policy"]?.impacts?.[0]?.targetPath).toBe(
+      "channels.*.dm.allowFrom",
+    );
+    expect(res.uiHints["channels.telegram.streamMode"]?.impacts?.[0]?.relation).toBe("conflicts");
   });
 });

@@ -79,6 +79,10 @@ export function renderChannels(props: ChannelsProps) {
         </div>
         <div class="muted">${props.lastSuccessAt ? formatAgo(props.lastSuccessAt) : "n/a"}</div>
       </div>
+      <div class="callout" style="margin-top: 12px;">
+        If setup is unclear or replies are missing, run <code>openclaw doctor</code> and
+        <code>openclaw channels status --probe</code> to get targeted fixes.
+      </div>
       ${
         props.lastError
           ? html`<div class="callout danger" style="margin-top: 12px;">
