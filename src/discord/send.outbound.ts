@@ -10,6 +10,7 @@ import { resolveMarkdownTableMode } from "../config/markdown-tables.js";
 import { recordChannelActivity } from "../infra/channel-activity.js";
 import { convertMarkdownTables } from "../markdown/tables.js";
 import { resolveDiscordAccount } from "./accounts.js";
+import { enforceOutboundAllowlist } from "./send.outbound-allowlist.js";
 import {
   buildDiscordSendError,
   buildDiscordTextChunks,
@@ -21,6 +22,7 @@ import {
   sendDiscordMedia,
   sendDiscordText,
 } from "./send.shared.js";
+import { DiscordSendError } from "./send.types.js";
 
 type DiscordSendOpts = {
   token?: string;
@@ -71,14 +73,37 @@ export async function sendMessageDiscord(
   const { token, rest, request } = createDiscordClient(opts, cfg);
   const recipient = await parseAndResolveRecipient(to, opts.accountId);
   const { channelId } = await resolveChannelId(rest, recipient, request);
+  const isDm = recipient.kind === "user";
 
-  // Forum/Media channels reject POST /messages; auto-create a thread post instead.
-  let channelType: number | undefined;
+  // Fetch channel metadata (needed for forum detection and outbound allowlist).
+  let channel: APIChannel | undefined;
   try {
-    const channel = (await rest.get(Routes.channel(channelId))) as APIChannel | undefined;
-    channelType = channel?.type;
-  } catch {
-    // If we can't fetch the channel, fall through to the normal send path.
+    channel = (await request(
+      () => rest.get(Routes.channel(channelId)) as Promise<APIChannel>,
+      "channel-metadata",
+    )) as APIChannel | undefined;
+  } catch (err) {
+    if (!isDm) {
+      throw new DiscordSendError(
+        `Cannot verify outbound allowlist: channel metadata fetch failed for ${channelId}`,
+        { kind: "channel-metadata-unavailable", channelId },
+      );
+    }
+  }
+  const channelType = channel?.type;
+  const guildId = channel?.guild_id;
+  const parentChannelId = channel?.parent_id ?? undefined;
+
+  // Enforce outbound allowlist for non-DM sends.
+  if (!isDm) {
+    enforceOutboundAllowlist({
+      cfg,
+      accountId: accountInfo.accountId,
+      channelId,
+      guildId,
+      isDm: false,
+      parentChannelId,
+    });
   }
 
   if (isForumLikeType(channelType)) {
@@ -230,9 +255,36 @@ export async function sendStickerDiscord(
   opts: DiscordSendOpts & { content?: string } = {},
 ): Promise<DiscordSendResult> {
   const cfg = loadConfig();
+  const accountInfo = resolveDiscordAccount({ cfg, accountId: opts.accountId });
   const { rest, request } = createDiscordClient(opts, cfg);
   const recipient = await parseAndResolveRecipient(to, opts.accountId);
   const { channelId } = await resolveChannelId(rest, recipient, request);
+  const isDm = recipient.kind === "user";
+
+  // Enforce outbound allowlist for non-DM sends.
+  if (!isDm) {
+    let ch: APIChannel | undefined;
+    try {
+      ch = (await request(
+        () => rest.get(Routes.channel(channelId)) as Promise<APIChannel>,
+        "channel-metadata",
+      )) as APIChannel | undefined;
+    } catch {
+      throw new DiscordSendError(
+        `Cannot verify outbound allowlist: channel metadata fetch failed for ${channelId}`,
+        { kind: "channel-metadata-unavailable", channelId },
+      );
+    }
+    enforceOutboundAllowlist({
+      cfg,
+      accountId: accountInfo.accountId,
+      channelId,
+      guildId: ch?.guild_id,
+      isDm: false,
+      parentChannelId: ch?.parent_id ?? undefined,
+    });
+  }
+
   const content = opts.content?.trim();
   const stickers = normalizeStickerIds(stickerIds);
   const res = (await request(
@@ -257,9 +309,36 @@ export async function sendPollDiscord(
   opts: DiscordSendOpts & { content?: string } = {},
 ): Promise<DiscordSendResult> {
   const cfg = loadConfig();
+  const accountInfo = resolveDiscordAccount({ cfg, accountId: opts.accountId });
   const { rest, request } = createDiscordClient(opts, cfg);
   const recipient = await parseAndResolveRecipient(to, opts.accountId);
   const { channelId } = await resolveChannelId(rest, recipient, request);
+  const isDm = recipient.kind === "user";
+
+  // Enforce outbound allowlist for non-DM sends.
+  if (!isDm) {
+    let ch: APIChannel | undefined;
+    try {
+      ch = (await request(
+        () => rest.get(Routes.channel(channelId)) as Promise<APIChannel>,
+        "channel-metadata",
+      )) as APIChannel | undefined;
+    } catch {
+      throw new DiscordSendError(
+        `Cannot verify outbound allowlist: channel metadata fetch failed for ${channelId}`,
+        { kind: "channel-metadata-unavailable", channelId },
+      );
+    }
+    enforceOutboundAllowlist({
+      cfg,
+      accountId: accountInfo.accountId,
+      channelId,
+      guildId: ch?.guild_id,
+      isDm: false,
+      parentChannelId: ch?.parent_id ?? undefined,
+    });
+  }
+
   const content = opts.content?.trim();
   const payload = normalizeDiscordPollInput(poll);
   const res = (await request(
